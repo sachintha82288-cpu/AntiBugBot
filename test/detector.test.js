@@ -26,23 +26,33 @@ const LONE_LO = '\udc00'; // unpaired low surrogate
 const NONCHAR_FFFE = cp(0xfffe);
 const ASTRAL_NONCHAR = cp(0x1fffe); // plane-1 noncharacter - the & 0x7ff case
 
+// Sinhala is legitimate high-risk-looking traffic for our users, so it is
+// spelled with explicit escapes + the ZWJ constant: the source file stays pure
+// ASCII, and no control character can ever be committed as a raw literal.
+const SINHALA_OK = '\u0dc3\u0dca\u0dba \u0db4\u0dd0\u0dd2\u0db8\u0dca \u0dc3\u0db8\u0dca' + ZWJ + '\u0db8\u0dca!';
+
 test('clean everyday traffic stays clean (no false positives on real scripts)', () => {
-  // U+1F7FF is a deliberately chosen near-miss: it shares the low 11 bits
-  // (0x7FF) with the plane-1 noncharacters U+1FFFE/U+1FFFF, so a `& 0xff` style
-  // check would be wrong in *both* directions here.
+  // U+1F7FF is a deliberate near-miss: it shares the low 11 bits (0x7FF) with the
+  // plane-1 noncharacters U+1FFFE/U+1FFFF, so a `& 0xff` style check is wrong in
+  // *both* directions here.
   const natural = [
     'machine hello bro \u{1f602}',
-    'ඔයාට සුබ පැතුම්! මේ සාමාන්‍ය message එකක්.', // Sinhala, legit vowel signs + ZWJ
-    'السلام عليكم ورحمة الله',
+    SINHALA_OK,
+    '\u0627\u0644\u0633\u0644\u0627\u0645 \u0639\u0644\u064a\u0643\u0645', // Arabic
+    '\u0928\u092e\u0938\u094d\u0924\u0947', // Devanagari, has a conjunct
     `\u{1f469}\u{1f3fd}${ZWJ}\u{1f469}\u{1f3fb}${ZWJ}\u{1f466}${ZWJ}\u{1f466} family emoji`,
-    'mixed: naïve café résumé',
-    'a\u{1f1e6}\u{1f1e8}b', // regional indicators
-    cp(0x1f7ff), // near-miss low bits, assigned symbol
-    'a'.repeat(1) + ZWJ.repeat(3),
+    'mixed: na\u00efve caf\u00e9 r\u00e9sum\u00e9',
+    `a${cp(0x1f1e6)}${cp(0x1f1e8)}b`, // regional indicators
+    cp(0x1f7ff),
+    'a' + ZWJ + ZWJ + ZWJ,
   ];
   for (const text of natural) {
     const r = analyzeText(text);
-    assert.equal(r.verdict, 'clean', `expected clean, got ${r.verdict} signals=${r.signals} for ${JSON.stringify(text)}`);
+    assert.equal(
+      r.verdict,
+      'clean',
+      `expected clean, got ${r.verdict} signals=${r.signals} scores=${JSON.stringify(r.scores)} for ${JSON.stringify(text)}`,
+    );
     assert.ok(r.risk < 0.3, `risk too high: ${r.risk} for ${JSON.stringify(text)}`);
   }
 });

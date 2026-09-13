@@ -100,17 +100,20 @@ function buildHostileShape(rand) {
 }
 
 function buildBenignShape(rand) {
+  // ASCII-only corpus on purpose: this file is a generator, so any raw control
+  // character in it would be reproducible output. Real scripts are spelled with
+  // cp() (and cp() itself proves the benign class is not a false positive).
   const corpus = [
     'machine bro',
-    'ඔයාට සුබ පැතුම්! කොහේද ඉන්නේ?',
-    'السلام عليكم يارفيق',
-    'नमस्ते मित्रों',
-    `family ${cp(0x1f468)}${cp(0x200d)}${cp(0x1f469)}${cp(0x200d)}${cp(0x1f467)} 😂😂😂`,
-    'café résumé naïve Ñandú',
-    'ok. thanks. 👍',
+    `\u0dc3\u0dca\u0dba \u0db4\u0dd0\u0dd2\u0db8\u0dca\u0dad\u0dd2 \u0db8\u0dd9\u0db8\u0dd4?`, // Sinhala
+    `\u0627\u0644\u0633\u0644\u0627\u0645 \u0639\u0644\u064a\u0643\u0645`, // Arabic
+    `\u0928\u092e\u0938\u094d\u0924\u0947`, // Devanagari conjunct
+    `family ${cp(0x1f468)}${cp(0x200d)}${cp(0x1f469)}${cp(0x200d)}${cp(0x1f467)}`,
+    'caf\u00e9 r\u00e9sum\u00e9 na\u00efve \u00d1and\u00fa',
+    'ok. thanks. \u{1f44d}',
     'annnnnnnnnnnnnnnnnnnnnnnnn',
     'a'.repeat(4000), // long but structurally boring
-    '🇱🇰 🇸🇬 flags + 94771234567',
+    `\u{1f1f1}\u{1f1f0} \u{1f1f8}\u{1f1ec} +94771234567`,
   ];
   let s = '';
   const n = 1 + Math.floor(rand() * 6);
