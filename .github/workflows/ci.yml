@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: lint · test · selftest (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install (lockfile, no scripts from life-cycle hooks)
+        run: npm ci --ignore-scripts
+
+      - name: Syntax + module graph
+        run: node scripts/check-syntax.mjs
+
+      - name: Tests
+        run: npm test
+
+      - name: End-to-end pipeline against a fake socket
+        run: node src/index.js selftest --report-attempts 3
+
+      - name: Observe mode must never enforce, even in selftest
+        run: node src/index.js selftest --mode observe | tee /tmp/observe.log && grep -q "observe mode" /tmp/observe.log
+
+      - name: Offline commands stay useful
+        run: |
+          node src/index.js status
+          node src/index.js history --limit 5
+          node src/index.js blocked
+          node src/index.js whitelist list
+          node src/index.js help
+
+      - name: Configuration is validated, not guessed
+        run: |
+          set +e
+          out=$(node src/index.js status --threshold tiny 2>&1)
+          code=$?
+          set -e
+          test "$code" = "2"
+          echo "$out" | grep -q "CONFIG ERROR"
