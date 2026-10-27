@@ -1,0 +1,57 @@
+{
+  "name": "antibugbot",
+  "version": "1.0.0",
+  "description": "AntiBugBot — a WhatsApp crash-bug shield. Oversized messages are quarantined: deleted for me, the sender blocked, reports filed, and a full incident brief sent to your own number.",
+  "keywords": [
+    "whatsapp",
+    "baileys",
+    "antibug",
+    "protection",
+    "moderation",
+    "security"
+  ],
+  "license": "MIT",
+  "author": "sachintha82288",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "antibugbot": "src/index.js"
+  },
+  "engines": {
+    "node": ">=18.15.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "pair": "node src/index.js pair",
+    "logout": "node src/index.js logout",
+    "status": "node src/index.js status",
+    "history": "node src/index.js history",
+    "blocked": "node src/index.js blocked",
+    "unblock": "node src/index.js unblock",
+    "whitelist": "node src/index.js whitelist",
+    "selftest": "node src/index.js selftest",
+    "test": "node --test",
+    "check": "node scripts/check-syntax.mjs",
+    "test:watch": "node --test --test-watch"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "qrcode-terminal": "0.12.0"
+  },
+  "devDependencies": {},
+  "files": [
+    "src/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sachintha82288-cpu/AntiBugBot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sachintha82288-cpu/AntiBugBot/issues"
+  },
+  "homepage": "https://github.com/sachintha82288-cpu/AntiBugBot#readme"
+}
